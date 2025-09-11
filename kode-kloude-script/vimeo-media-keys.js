@@ -49,6 +49,7 @@ window.__vimeo_media_keys_loaded__ = true;
           const subtitleSpan = capDiv.querySelector("span");
           if (subtitleSpan) {
             subtitleSpan.style.setProperty("font-size", "14px", "important");
+            subtitleSpan.style.setProperty("opacity", "0.6", "important");
             console.log("📝 Subtitle font resized.");
           }
         }

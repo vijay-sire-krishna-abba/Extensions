@@ -77,6 +77,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     img.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
     document.body.appendChild(img);
 
-    setTimeout(() => img.remove(), 2000);
+    setTimeout(() => img.remove(), 300);
   }
 });

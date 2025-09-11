@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Vimeo Screenshot + Captions",
+  "version": "1.0",
+  "permissions": ["tabs", "activeTab", "scripting"],
+  "host_permissions": ["*://player.vimeo.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://player.vimeo.com/*"],
+      "js": ["content.js"],
+      "all_frames": true
+    }
+  ],
+  "commands": {
+    "capture-tab": {
+      "suggested_key": {
+        "default": "Alt+Shift+S",
+        "mac": "Alt+Shift+S"
+      },
+      "description": "Capture Vimeo frame with captions"
+    }
+  },
+  "action": {
+    "default_title": "Capture Vimeo Frame"
+  }
+}

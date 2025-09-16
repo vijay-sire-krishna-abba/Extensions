@@ -60,7 +60,7 @@ const controllerDivQuery = ".ControlBarV1_module_controlBarWrapper__cf14f860";
         const controllerDiv = document.querySelector(controllerDivQuery);
 
         // default opacity
-        controllerDiv.style.setProperty("opacity", "0.1", "important");
+        controllerDiv.style.setProperty("opacity", "0", "important");
 
         // on hover
         controllerDiv.addEventListener("mouseenter", () => {
@@ -69,8 +69,44 @@ const controllerDivQuery = ".ControlBarV1_module_controlBarWrapper__cf14f860";
 
         // back to normal when mouse leaves
         controllerDiv.addEventListener("mouseleave", () => {
-          controllerDiv.style.setProperty("opacity", "0.1", "important");
+          controllerDiv.style.setProperty("opacity", "0", "important");
         });
+
+        // pause at 98% of progress
+        // Select the progress bar element
+        const progressBar = document.querySelector(
+          'div[data-progress-bar-played="true"]'
+        );
+
+        // Function to check width
+        function checkProgress() {
+          if (!progressBar) return;
+
+          // Get numeric width (strip % and convert to float)
+          const width = parseFloat(progressBar.style.width);
+
+          if (width >= 98.5) {
+            console.log("Progress >= 98.5%, pausing video...");
+
+            // Find and click the play/pause button
+            const playPauseBtn = document.querySelector(
+              ".PlayButton_module_playButton__dfb7bfee"
+            );
+            if (playPauseBtn) playPauseBtn.click();
+
+            // Stop observing after first pause
+            observer.disconnect();
+            console.log("Observer stopped after pausing.");
+          }
+        }
+
+        // Observe changes in the "style" attribute (width updates)
+        const observer = new MutationObserver(checkProgress);
+        observer.observe(progressBar, {
+          attributes: true,
+          attributeFilter: ["style"],
+        });
+        // true
       }, 1000);
     },
   };

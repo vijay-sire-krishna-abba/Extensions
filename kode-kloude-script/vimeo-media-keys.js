@@ -58,7 +58,19 @@ const controllerDivQuery = ".ControlBarV1_module_controlBarWrapper__cf14f860";
         }
 
         const controllerDiv = document.querySelector(controllerDivQuery);
-        controllerDiv.style.setProperty("opacity", "0.3", "important");
+
+        // default opacity
+        controllerDiv.style.setProperty("opacity", "0.1", "important");
+
+        // on hover
+        controllerDiv.addEventListener("mouseenter", () => {
+          controllerDiv.style.setProperty("opacity", "1", "important");
+        });
+
+        // back to normal when mouse leaves
+        controllerDiv.addEventListener("mouseleave", () => {
+          controllerDiv.style.setProperty("opacity", "0.1", "important");
+        });
       }, 1000);
     },
   };

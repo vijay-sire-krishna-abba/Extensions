@@ -55,6 +55,8 @@ const controllerDivQuery = ".ControlBarV1_module_controlBarWrapper__cf14f860";
             subtitleSpan.style.setProperty("opacity", "0.3", "important");
             console.log("📝 Subtitle font resized.");
           }
+        } else {
+          
         }
 
         const controllerDiv = document.querySelector(controllerDivQuery);

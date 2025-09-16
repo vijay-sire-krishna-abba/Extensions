@@ -35,11 +35,27 @@
     async function sendOnce() {
       if (sent) return;
 
-      const enTrack = document.querySelector(trackQueryString);
-      if (!enTrack) return console.warn("❌ No EN subtitle track found");
+      let enTrack = document.querySelector(trackQueryString);
+      if (!enTrack) {
+        //  en-US not found get en-x-autogen
+        console.log("⚠️ trying to get Just En subtitles");
+        const enTrackQueryString = 'track[srclang="en"]';
+        enTrack = document.querySelector(enTrackQueryString);
+        console.log(enTrack);
+
+        if (!enTrack) {
+          console.log("⚠️ trying to get auto gen subtitles");
+          const autoGenTrackQueryString = 'track[srclang="en-x-autogen"]';
+          enTrack = document.querySelector(autoGenTrackQueryString);
+          console.log(enTrack);
+          if (!enTrack) return console.warn("❌ No EN subtitle track found");
+        }
+      }
 
       const vttUrl = enTrack.src;
-      if (!vttUrl) return console.warn("❌ Subtitle track has no src");
+      if (!vttUrl) {
+        return console.warn("❌ Subtitle track has no src");
+      }
 
       // getting length of the video
       const slider = document.querySelector(progressBarQuery);

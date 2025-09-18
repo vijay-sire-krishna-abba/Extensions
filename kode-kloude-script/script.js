@@ -36,6 +36,9 @@
       if (sent) return;
 
       let enTrack = document.querySelector(trackQueryString);
+      if(enTrack){
+        console.log("✅ Found at en-US which is CC")
+      }
       if (!enTrack) {
         //  en-US not found get en-x-autogen
         console.log("⚠️ trying to get Just En subtitles");

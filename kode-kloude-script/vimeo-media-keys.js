@@ -52,11 +52,21 @@ const controllerDivQuery = ".ControlBarV1_module_controlBarWrapper__cf14f860";
           const subtitleSpan = capDiv.querySelector("span");
           if (subtitleSpan) {
             subtitleSpan.style.setProperty("font-size", "14px", "important");
-            subtitleSpan.style.setProperty("opacity", "0.3", "important");
+            // subtitleSpan.style.setProperty("opacity", "0.1", "important");
+            // default opacity
+            subtitleSpan.style.setProperty("opacity", "0", "important");
+            // on hover
+            subtitleSpan.addEventListener("mouseenter", () => {
+              subtitleSpan.style.setProperty("opacity", "1", "important");
+            });
+            // back to normal when mouse leaves
+            subtitleSpan.addEventListener("mouseleave", () => {
+              subtitleSpan.style.setProperty("opacity", "0", "important");
+            });
+
             console.log("📝 Subtitle font resized.");
           }
         } else {
-          
         }
 
         const controllerDiv = document.querySelector(controllerDivQuery);

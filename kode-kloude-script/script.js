@@ -35,25 +35,7 @@
     async function sendOnce() {
       if (sent) return;
 
-      let enTrack = document.querySelector(trackQueryString);
-      if(enTrack){
-        console.log("✅ Found at en-US which is CC")
-      }
-      if (!enTrack) {
-        //  en-US not found get en-x-autogen
-        console.log("⚠️ trying to get Just En subtitles");
-        const enTrackQueryString = 'track[srclang="en"]';
-        enTrack = document.querySelector(enTrackQueryString);
-        console.log(enTrack);
-
-        if (!enTrack) {
-          console.log("⚠️ trying to get auto gen subtitles");
-          const autoGenTrackQueryString = 'track[srclang="en-x-autogen"]';
-          enTrack = document.querySelector(autoGenTrackQueryString);
-          console.log(enTrack);
-          if (!enTrack) return console.warn("❌ No EN subtitle track found");
-        }
-      }
+      let enTrack = findEnglishTrack();
 
       const vttUrl = enTrack.src;
       if (!vttUrl) {
@@ -88,6 +70,28 @@
   /** -------------------------------
    *  Utils
    * ------------------------------- */
+
+  function findEnglishTrack() {
+    const queries = [
+      { selector: 'track[srclang="en-US"]', label: "✅ Found en-US (CC)" },
+      { selector: 'track[srclang="en"]', label: "⚠️ Found plain en" },
+      {
+        selector: 'track[srclang="en-x-autogen"]',
+        label: "⚠️ Found auto-generated en",
+      },
+    ];
+
+    for (const { selector, label } of queries) {
+      const track = document.querySelector(selector);
+      if (track) {
+        console.log(label, `(${track.srclang})`);
+        return track;
+      }
+    }
+
+    console.warn("❌ No EN subtitle track found");
+    return null;
+  }
 
   function getCleanTitle() {
     return document.title.split(" from ")[0].trim();

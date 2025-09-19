@@ -48,11 +48,12 @@ const controllerDivQuery = ".ControlBarV1_module_controlBarWrapper__cf14f860";
     adjustFontSize() {
       setTimeout(() => {
         const capDiv = document.querySelector(captionDivQuery);
+        let subtitleSpan;
         if (capDiv) {
-          const subtitleSpan = capDiv.querySelector("span");
+          subtitleSpan = capDiv.querySelector("span");
           if (subtitleSpan) {
             subtitleSpan.style.setProperty("font-size", "14px", "important");
-            subtitleSpan.style.setProperty("opacity", "0.2", "important");
+            subtitleSpan.style.setProperty("opacity", "0", "important");
 
             console.log("📝 Subtitle font resized.");
           }
@@ -67,11 +68,13 @@ const controllerDivQuery = ".ControlBarV1_module_controlBarWrapper__cf14f860";
         // on hover
         controllerDiv.addEventListener("mouseenter", () => {
           controllerDiv.style.setProperty("opacity", "1", "important");
+          subtitleSpan.style.setProperty("opacity", "1", "important");
         });
 
         // back to normal when mouse leaves
         controllerDiv.addEventListener("mouseleave", () => {
           controllerDiv.style.setProperty("opacity", "0", "important");
+          subtitleSpan.style.setProperty("opacity", "0", "important");
         });
 
         // pause at 98% of progress

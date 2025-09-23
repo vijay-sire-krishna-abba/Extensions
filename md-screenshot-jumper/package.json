@@ -1,0 +1,31 @@
+{
+  "name": "md-screenshot-jumper",
+  "displayName": "MD Screenshot Jumper",
+  "description": "Jump to last screenshot in Markdown file after external edits (only when file is open).",
+  "version": "0.0.1",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "mdScreenshotJumper.toggle",
+        "title": "Toggle Screenshot Jumper"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "echo 'no prepublish needed'"
+  },
+  "keywords": [
+    "markdown",
+    "screenshot",
+    "jump",
+    "watch"
+  ]
+}

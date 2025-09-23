@@ -1,0 +1,31 @@
+{
+  "name": "auto-open-md",
+  "displayName": "Auto Open Markdown",
+  "description": "Automatically opens new Markdown files created in the workspace. Includes ON/OFF toggle.",
+  "version": "0.0.1",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "autoOpenMd.toggle",
+        "title": "Toggle Auto Open Markdown"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "echo 'no prepublish needed'"
+  },
+  "keywords": [
+    "markdown",
+    "autoopen",
+    "watch",
+    "productivity"
+  ]
+}

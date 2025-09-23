@@ -9,6 +9,8 @@
   const trackQueryString = 'track[srclang="en-US"]';
   const progressBarQuery = 'div[aria-label="Progress Bar"]';
 
+  let subtitlesType;
+
   /** -------------------------------
    *  Server API
    * ------------------------------- */
@@ -60,6 +62,7 @@
           parentTitle: slugifyTitle(parentTitle),
           videoLength,
           rootDirectory,
+          subtitlesType,
         });
         sent = true;
       } catch (err) {
@@ -87,6 +90,7 @@
     for (const { selector, label } of queries) {
       const track = document.querySelector(selector);
       if (track) {
+        subtitlesType = label;
         console.log(label, `(${track.srclang})`);
         return track;
       }

@@ -46,6 +46,8 @@
       const slider = document.querySelector(progressBarQuery);
       const videoLength = slider.getAttribute("aria-valuetext");
 
+      let rootDirectory = "kodekloud";
+
       try {
         const res = await fetch(vttUrl);
         const text = await res.text();
@@ -57,6 +59,7 @@
           title,
           parentTitle: slugifyTitle(parentTitle),
           videoLength,
+          rootDirectory,
         });
         sent = true;
       } catch (err) {

@@ -29,7 +29,9 @@ function getVimeoData() {
   let title = document.title || "";
   title = getCleanTitle(title);
 
-  return { title, timestamp, captions };
+  let rootDirectory = "kodekloud";
+
+  return { title, timestamp, captions, rootDirectory };
 }
 
 // ask parent for course title (Tampermonkey responds)

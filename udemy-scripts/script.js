@@ -113,6 +113,7 @@
               title: getCurrentTitle(),
               parentTitle: getParentTitle(),
               videoLength: getCurrentLength(),
+              rootDirectory: "udemy",
             });
           }
         } catch (err) {

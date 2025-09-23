@@ -67,12 +67,15 @@ async function captureActiveUdemyTab() {
       chrome.tabs.sendMessage(tab.id, { action: "tabCaptured", dataUrl });
 
       // Build payload exactly how server expects: screenshot key contains data URL
+      let rootDirectory = "udemy";
+
       const payload = {
         parentTitle,
         title,
         timestamp,
         captions,
         screenshot: dataUrl,
+        rootDirectory,
       };
 
       // Send as JSON (server expects screenshot in req.body.screenshot)

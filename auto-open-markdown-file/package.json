@@ -2,7 +2,7 @@
   "name": "auto-open-md",
   "displayName": "Auto Open Markdown",
   "description": "Automatically opens new Markdown files created in the workspace. Includes ON/OFF toggle.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "local",
   "engines": {
     "vscode": "^1.90.0"

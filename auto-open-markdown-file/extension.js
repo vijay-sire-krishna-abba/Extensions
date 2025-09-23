@@ -40,6 +40,11 @@ function activate(context) {
       if (baseName === parentName) {
         const doc = await vscode.workspace.openTextDocument(uri);
         await vscode.window.showTextDocument(doc, { preview: false });
+
+        // 🪄 Collapse folders in Explorer after opening
+        await vscode.commands.executeCommand(
+          "workbench.files.action.collapseExplorerFolders"
+        );
       }
     } catch (err) {
       console.error("auto-open-md error:", err);

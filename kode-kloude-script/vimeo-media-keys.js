@@ -3,7 +3,7 @@ if (window.__vimeo_media_keys_loaded__) return;
 window.__vimeo_media_keys_loaded__ = true;
 
 const captionDivQuery = 'div[lang="en-US"]';
-const controllerDivQuery = ".ControlBarV1_module_controlBarWrapper__cf14f860";
+const controllerDivQuery = 'div[data-control-bar="true"]';
 
 (function () {
   "use strict";
@@ -60,7 +60,8 @@ const controllerDivQuery = ".ControlBarV1_module_controlBarWrapper__cf14f860";
         } else {
         }
 
-        const controllerDiv = document.querySelector(controllerDivQuery);
+        const controllerDiv =
+          document.querySelector(controllerDivQuery)?.parentElement;
 
         // default opacity
         controllerDiv.style.setProperty("opacity", "0", "important");

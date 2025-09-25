@@ -4,6 +4,8 @@ window.__vimeo_media_keys_loaded__ = true;
 
 const captionDivQuery = 'div[lang="en-US"]';
 const controllerDivQuery = 'div[data-control-bar="true"]';
+const progressBarQuery = 'div[data-progress-bar-played="true"]';
+const playPauseBtnQuery = 'button[data-play-button="true"]';
 
 (function () {
   "use strict";
@@ -80,9 +82,7 @@ const controllerDivQuery = 'div[data-control-bar="true"]';
 
         // pause at 98% of progress
         // Select the progress bar element
-        const progressBar = document.querySelector(
-          'div[data-progress-bar-played="true"]'
-        );
+        const progressBar = document.querySelector(progressBarQuery);
 
         // Function to check width
         function checkProgress() {
@@ -95,9 +95,7 @@ const controllerDivQuery = 'div[data-control-bar="true"]';
             console.log("Progress >= 98.5%, pausing video...");
 
             // Find and click the play/pause button
-            const playPauseBtn = document.querySelector(
-              ".PlayButton_module_playButton__dfb7bfee"
-            );
+            const playPauseBtn = document.querySelector(playPauseBtnQuery);
             if (playPauseBtn) playPauseBtn.click();
 
             // Stop observing after first pause

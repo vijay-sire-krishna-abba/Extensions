@@ -38,10 +38,27 @@ function activate(context) {
 
       // ✅ Only open if filename (without extension) matches folder name
       if (baseName === parentName) {
+        // 1. Close all opened .md editors EXCEPT "titles.md"
+        for (const group of vscode.window.tabGroups.all) {
+          for (const tab of group.tabs) {
+            if (
+              tab.input &&
+              tab.input.uri &&
+              tab.input.uri.fsPath.endsWith(".md")
+            ) {
+              const name = path.basename(tab.input.uri.fsPath);
+              if (name !== "titles.md") {
+                await vscode.window.tabGroups.close(tab);
+              }
+            }
+          }
+        }
+
+        // 2. Open the target file
         const doc = await vscode.workspace.openTextDocument(uri);
         await vscode.window.showTextDocument(doc, { preview: false });
 
-        // 🪄 Collapse folders in Explorer after opening
+        // 3. 🪄 Collapse folders in Explorer after opening
         await vscode.commands.executeCommand(
           "workbench.files.action.collapseExplorerFolders"
         );

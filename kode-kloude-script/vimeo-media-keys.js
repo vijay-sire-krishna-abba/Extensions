@@ -52,6 +52,7 @@ const playPauseBtnQuery = 'button[data-play-button="true"]';
         const capDiv = document.querySelector(captionDivQuery);
         let subtitleSpan;
         if (capDiv) {
+          // subtitles 
           subtitleSpan = capDiv.querySelector("span");
           if (subtitleSpan) {
             subtitleSpan.style.setProperty("font-size", "14px", "important");
@@ -62,6 +63,7 @@ const playPauseBtnQuery = 'button[data-play-button="true"]';
         } else {
         }
 
+        // controllers hide 
         const controllerDiv =
           document.querySelector(controllerDivQuery)?.parentElement;
 

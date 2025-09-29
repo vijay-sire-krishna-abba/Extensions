@@ -13,26 +13,6 @@ const SELECTORS = {
   video: "video",
 };
 
-// ---------- Utility: Wait for element ----------
-function waitForElement(
-  selector,
-  callback,
-  checkInterval = 100,
-  timeout = 10000
-) {
-  const start = Date.now();
-  const interval = setInterval(() => {
-    const element = document.querySelector(selector);
-    if (element) {
-      clearInterval(interval);
-      callback(element);
-    } else if (Date.now() - start > timeout) {
-      clearInterval(interval);
-      console.warn(`Timeout: Element not found -> ${selector}`);
-    }
-  }, checkInterval);
-}
-
 // ---------- Progress Observer ----------
 function initProgressObserver() {
   const progressBar = document.querySelector(SELECTORS.progressBar);
@@ -72,32 +52,6 @@ function initProgressObserver() {
   checkProgress();
 }
 
-// ---------- Subtitles Handler ----------
-function hideSubtitles() {
-  console.log("🎬 Hiding subtitles...");
-
-  waitForElement(SELECTORS.controllerDiv, (element) => {
-    const controllerDiv = element?.parentElement;
-    if (!controllerDiv) return;
-
-    // Default opacity
-    controllerDiv.style.setProperty("opacity", "0", "important");
-
-    // Show on hover
-    controllerDiv.addEventListener("mouseenter", () => {
-      controllerDiv.style.setProperty("opacity", "1", "important");
-    });
-
-    // Hide again on mouse leave
-    controllerDiv.addEventListener("mouseleave", () => {
-      controllerDiv.style.setProperty("opacity", "0", "important");
-    });
-
-    // Kick off observer after subtitles are found
-    initProgressObserver();
-  });
-}
-
 // ---------- MediaSession API ----------
 function setupMediaSession() {
   if (!("mediaSession" in navigator)) return;
@@ -126,5 +80,5 @@ function setupMediaSession() {
 (function () {
   "use strict";
   setupMediaSession();
-  hideSubtitles();
+  initProgressObserver();
 })();

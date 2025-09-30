@@ -79,6 +79,28 @@
     return document.querySelector(captionsQuery)?.innerText || "";
   }
 
+  function getSectionName() {
+    // Find the active <li>
+    const activeLi = document.querySelector(liElQuery);
+
+    if (activeLi) {
+      // Get the nearest wrapper <div> of this li
+      const wrapperDiv = activeLi.closest("div");
+
+      if (wrapperDiv) {
+        // Find the previous sibling <div> (the one containing <h3>)
+        const sectionDiv = wrapperDiv.parentElement?.previousElementSibling;
+
+        if (sectionDiv) {
+          const heading = sectionDiv.querySelector("h3");
+          if (heading) {
+            return slugifyTitle(heading.textContent.trim());
+          }
+        }
+      }
+    }
+  }
+
   /** -------------------------------
    *  Utils END
    * ------------------------------- */
@@ -113,6 +135,7 @@
               title: getCurrentTitle(),
               parentTitle: getParentTitle(),
               videoLength: getCurrentLength(),
+              sectionName: getSectionName(),
               rootDirectory: "udemy",
             });
           }

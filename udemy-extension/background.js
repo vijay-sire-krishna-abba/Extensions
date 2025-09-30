@@ -52,6 +52,7 @@ async function captureActiveUdemyTab() {
   const title = resp?.title || "";
   const timestamp = resp?.timestamp || "";
   const captions = resp?.captions || "";
+  const sectionName = resp?.sectionName || "";
 
   // Capture visible tab (use jpeg with quality or png)
   chrome.tabs.captureVisibleTab(
@@ -75,6 +76,7 @@ async function captureActiveUdemyTab() {
         timestamp,
         captions,
         screenshot: dataUrl,
+        sectionName,
         rootDirectory,
       };
 

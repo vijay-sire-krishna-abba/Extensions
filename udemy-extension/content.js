@@ -20,6 +20,28 @@ function slugifyTitle(title) {
     .replace(/\s+/g, "-"); // spaces -> hyphens
 }
 
+function getSectionName() {
+  // Find the active <li>
+  const activeLi = document.querySelector(liElQuery);
+
+  if (activeLi) {
+    // Get the nearest wrapper <div> of this li
+    const wrapperDiv = activeLi.closest("div");
+
+    if (wrapperDiv) {
+      // Find the previous sibling <div> (the one containing <h3>)
+      const sectionDiv = wrapperDiv.parentElement?.previousElementSibling;
+
+      if (sectionDiv) {
+        const heading = sectionDiv.querySelector("h3");
+        if (heading) {
+          return slugifyTitle(heading.textContent.trim());
+        }
+      }
+    }
+  }
+}
+
 // Respond to messages from background
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.action === "getParentTitle") {
@@ -41,8 +63,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
     const captions = document.querySelector(captionsQuery)?.innerText || "";
 
+    const sectionName = getSectionName();
+
     // sendResponse synchronously
-    sendResponse({ parentTitle, title, timestamp, captions });
+    sendResponse({ parentTitle, title, timestamp, captions, sectionName });
     // Return true only for async responses; not needed here but harmless
     return;
   }

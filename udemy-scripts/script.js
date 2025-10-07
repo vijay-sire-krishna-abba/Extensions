@@ -54,8 +54,10 @@
     return slugifyTitle(courseTitle);
   }
 
-  function getCurrentLength() {
-    return document.querySelector(videoLengthQuery)?.textContent || "unknown";
+  async function getCurrentLength() {
+    return await waitAndRun(() => {
+      return document.querySelector(videoLengthQuery)?.textContent || "unknown";
+    }, 2000);
   }
 
   function getCurrentTitle() {
@@ -119,7 +121,7 @@
 
     const origSend = XMLHttpRequest.prototype.send;
     XMLHttpRequest.prototype.send = function (...args) {
-      this.addEventListener("load", function () {
+      this.addEventListener("load", async function () {
         try {
           if (
             this._targetUrl &&
@@ -128,13 +130,15 @@
           ) {
             console.log(this._targetUrl);
 
+            const videoLength = await getCurrentLength();
+
             // Send to server
             ServerAPI.post("save-subtitles", {
               url: this._targetUrl,
               content: this.responseText,
               title: getCurrentTitle(),
               parentTitle: getParentTitle(),
-              videoLength: getCurrentLength(),
+              videoLength: videoLength,
               sectionName: getSectionName(),
               rootDirectory: "udemy",
             });

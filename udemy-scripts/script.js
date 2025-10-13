@@ -5,7 +5,7 @@
 
   // Variables
   const urlAndPort = "http://localhost:3000/";
-  const parentHeadingQuery = 'h1[data-purpose="course-header-title"] a';
+  const parentHeadingQuery = 'h1[data-purpose="course-header-title"]';
   const videoLengthQuery = 'span[data-purpose="duration"]';
   const timestampQuery = 'span[data-purpose="current-time"]';
   const captionsQuery = 'div[data-purpose="captions-cue-text"]';
@@ -49,6 +49,7 @@
 
   function getParentTitle() {
     const titleEl = document.querySelector(parentHeadingQuery);
+
     const courseTitle = titleEl ? titleEl.textContent.trim() : null;
 
     return slugifyTitle(courseTitle);

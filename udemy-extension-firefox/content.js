@@ -93,6 +93,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     // Auto-remove overlay after 5 seconds
     setTimeout(() => {
       img.remove();
-    }, 5000);
+    }, 500);
   }
 });

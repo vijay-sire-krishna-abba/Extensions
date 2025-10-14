@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Udemy Subtitle Extractor (Chrome + Firefox)
 // @namespace    http://tampermonkey.net/
-// @version      1.4
+// @version      1.5
 // @description  Capture Udemy subtitle (.vtt) files and send them to localhost server
 // @match        *://*.udemy.com/course/*
 // @grant        GM_xmlhttpRequest
@@ -13,132 +13,127 @@
 (function () {
   "use strict";
 
+  /**************************************************************
+   * CONFIGURATION
+   **************************************************************/
   const SERVER_URL = "http://localhost:3000/save-subtitles";
+  const ROOT_DIRECTORY = "udemy";
 
-  console.log("[Udemy Subtitle Extractor] Script loaded");
+  console.log("[Udemy Subtitle Extractor] ✅ Script initialized");
 
-  // Confirm context
-  console.log(
-    "[Udemy Subtitle Extractor] Context:",
-    window === unsafeWindow ? "sandbox" : "page"
-  );
+  /**************************************************************
+   * DOM SELECTORS
+   **************************************************************/
+  const SELECTORS = {
+    parentHeading: 'h1[data-purpose="course-header-title"]',
+    videoLength: 'span[data-purpose="duration"]',
+    timestamp: 'span[data-purpose="current-time"]',
+    captions: 'div[data-purpose="captions-cue-text"]',
+    activeLesson: 'li[aria-current="true"]',
+    lessonTitle: 'span[data-purpose="item-title"]',
+  };
 
-  // Variables
-  const parentHeadingQuery = 'h1[data-purpose="course-header-title"]';
-  const videoLengthQuery = 'span[data-purpose="duration"]';
-  const timestampQuery = 'span[data-purpose="current-time"]';
-  const captionsQuery = 'div[data-purpose="captions-cue-text"]';
+  /**************************************************************
+   * UTILITIES
+   **************************************************************/
 
-  const liElQuery = 'li[aria-current="true"]';
-  const liSpanElQuery = 'span[data-purpose="item-title"]';
-  let count = 0;
-
-  /** -------------------------------
-   *  Utils
-   * ------------------------------- */
+  /** Pause before running a function */
   async function waitAndRun(fn, delay = 3000) {
-    await new Promise((resolve) => setTimeout(resolve, delay)); // ⏳ wait
-    return fn(); // ✅ run the function after delay
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    return fn();
   }
 
-  function slugifyTitle(title) {
-    return title
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, "") // 2️⃣ remove special characters (keep letters, numbers, space, and "-")
-      .replace(/\s+/g, "-"); // 3️⃣ replace spaces with "-"
+  /** Convert text into a safe filename slug */
+  function slugify(text) {
+    return text
+      ? text
+          .toLowerCase()
+          .trim()
+          .replace(/[^\w\s-]/g, "")
+          .replace(/\s+/g, "-")
+      : "unknown";
   }
 
+  /** Get top-level course title */
   function getParentTitle() {
-    const titleEl = document.querySelector(parentHeadingQuery);
-
-    const courseTitle = titleEl ? titleEl.textContent.trim() : null;
-
-    return slugifyTitle(courseTitle);
+    const titleEl = document.querySelector(SELECTORS.parentHeading);
+    return slugify(titleEl?.textContent || "unknown-course");
   }
 
-  async function getCurrentLength() {
+  /** Get currently playing video title */
+  function getCurrentTitle() {
+    const li = document.querySelector(SELECTORS.activeLesson);
+    const span = li?.querySelector(SELECTORS.lessonTitle);
+    return slugify(span?.textContent || "unknown-video");
+  }
+
+  /** Get current section name */
+  function getSectionName() {
+    const activeLi = document.querySelector(SELECTORS.activeLesson);
+    if (!activeLi) return "unknown-section";
+    const wrapperDiv = activeLi.closest("div");
+    const sectionDiv = wrapperDiv?.parentElement?.previousElementSibling;
+    const heading = sectionDiv?.querySelector("h3");
+    return slugify(heading?.textContent || "unknown-section");
+  }
+
+  /** Get full video length */
+  async function getVideoLength() {
     return await waitAndRun(() => {
-      return document.querySelector(videoLengthQuery)?.textContent || "unknown";
+      return (
+        document.querySelector(SELECTORS.videoLength)?.textContent || "unknown"
+      );
     }, 2000);
   }
 
-  function getCurrentTitle() {
-    // Select the <li> with aria-current="true"
-    const liEl = document.querySelector(liElQuery);
-
-    // From inside that <li>, find the span[data-purpose="item-title"]
-    const spanEl = liEl ? liEl.querySelector(liSpanElQuery) : null;
-
-    // Get its text
-    const text = spanEl ? spanEl.textContent.trim() : null;
-
-    return slugifyTitle(text);
-  }
-
+  /** Get current timestamp (playhead) */
   function getTimestamp() {
-    return document.querySelector(timestampQuery)?.innerText || "unknown";
+    return document.querySelector(SELECTORS.timestamp)?.innerText || "unknown";
   }
 
+  /** Get current caption text (on-screen subtitle) */
   function getCaptions() {
-    return document.querySelector(captionsQuery)?.innerText || "";
+    return document.querySelector(SELECTORS.captions)?.innerText || "";
   }
 
-  function getSectionName() {
-    // Find the active <li>
-    const activeLi = document.querySelector(liElQuery);
+  /**************************************************************
+   * NETWORK HELPERS
+   **************************************************************/
 
-    if (activeLi) {
-      // Get the nearest wrapper <div> of this li
-      const wrapperDiv = activeLi.closest("div");
-
-      if (wrapperDiv) {
-        // Find the previous sibling <div> (the one containing <h3>)
-        const sectionDiv = wrapperDiv.parentElement?.previousElementSibling;
-
-        if (sectionDiv) {
-          const heading = sectionDiv.querySelector("h3");
-          if (heading) {
-            return slugifyTitle(heading.textContent.trim());
-          }
-        }
-      }
-    }
-  }
-  /** -------------------------------
-   *  Utils END
-   * ------------------------------- */
-
-  // Helper: send subtitle to local server
+  /** Send captured subtitle to local server */
   function sendToServer(data) {
-    console.log(data);
+    console.log("[Udemy Subtitle Extractor] 📤 Sending to server:", data.url);
     GM_xmlhttpRequest({
       method: "POST",
       url: SERVER_URL,
       headers: { "Content-Type": "application/json" },
       data: JSON.stringify(data),
       onload: (res) =>
-        console.log(
-          "✅ Subtitle sent to server:",
-          res.status,
-          res.statusText || ""
-        ),
-      onerror: (err) =>
-        console.error("❌ Failed to send subtitle to server:", err),
+        console.log("✅ Server response:", res.status, res.statusText),
+      onerror: (err) => console.error("❌ Network error:", err),
     });
   }
 
-  // Helper: get metadata (optional)
-  function getCourseInfo() {
-    const title = document.title.replace(" | Udemy", "").trim();
-    const section =
-      document
-        .querySelector(".section--section-title--8blTh")
-        ?.textContent?.trim() || "Unknown Section";
-    return { title, section };
+  /** Build structured payload for server */
+  async function buildPayload({ url, content, source }) {
+    return {
+      url,
+      content,
+      source,
+      title: getCurrentTitle(),
+      parentTitle: getParentTitle(),
+      sectionName: getSectionName(),
+      videoLength: await getVideoLength(),
+      timestamp: getTimestamp(),
+      captions: getCaptions(),
+      rootDirectory: ROOT_DIRECTORY,
+      capturedAt: new Date().toISOString(),
+    };
   }
 
-  // --- Hook Fetch API ---
+  /**************************************************************
+   * FETCH HOOK
+   **************************************************************/
   (function hookFetch() {
     const originalFetch = window.fetch;
     window.fetch = async (...args) => {
@@ -146,23 +141,17 @@
       const url = typeof args[0] === "string" ? args[0] : args[0]?.url || "";
 
       if (url.includes(".vtt")) {
-        console.log("🎯 [fetch] Captured subtitle:", url);
+        console.log("🎯 [Fetch] Captured subtitle:", url);
         try {
           const text = await response.clone().text();
-          const info = getCourseInfo();
-          const videoLength = await getCurrentLength();
-
-          sendToServer({
-            url: this._url,
+          const payload = await buildPayload({
+            url,
             content: text,
-            videoLength: videoLength,
-            title: getCurrentTitle(),
-            parentTitle: getParentTitle(),
-            sectionName: getSectionName(),
-            rootDirectory: "udemy",
+            source: "fetch",
           });
+          sendToServer(payload);
         } catch (err) {
-          console.error("❌ Error reading fetched subtitle:", err);
+          console.error("❌ [Fetch] Failed to process subtitle:", err);
         }
       }
 
@@ -170,7 +159,9 @@
     };
   })();
 
-  // --- Hook XHR (for older subtitle loaders) ---
+  /**************************************************************
+   * XHR HOOK
+   **************************************************************/
   (function hookXHR() {
     const origOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (...args) {
@@ -185,21 +176,14 @@
           console.log("🎯 [XHR] Captured subtitle:", this._url);
           try {
             const text = this.responseText;
-            const info = getCourseInfo();
-
-            const videoLength = await getCurrentLength();
-
-            sendToServer({
+            const payload = await buildPayload({
               url: this._url,
               content: text,
-              videoLength: videoLength,
-              title: getCurrentTitle(),
-              parentTitle: getParentTitle(),
-              sectionName: getSectionName(),
-              rootDirectory: "udemy",
+              source: "xhr",
             });
+            sendToServer(payload);
           } catch (err) {
-            console.error("❌ Error reading XHR subtitle:", err);
+            console.error("❌ [XHR] Failed to process subtitle:", err);
           }
         }
       });
@@ -207,5 +191,8 @@
     };
   })();
 
-  console.log("[Udemy Subtitle Extractor] Hooks installed");
+  /**************************************************************
+   * FINALIZE
+   **************************************************************/
+  console.log("[Udemy Subtitle Extractor] Hooks installed successfully");
 })();

@@ -1,11 +1,11 @@
 {
-  "manifest_version": 3,
-  "name": "Udemy Screenshot Only",
+  "manifest_version": 2,
+  "name": "Udemy Screenshot Only (Firefox)",
   "version": "1.0",
-  "permissions": ["tabs", "activeTab", "scripting"],
-  "host_permissions": ["*://*.udemy.com/*"],
+  "description": "Capture Udemy video screenshots with timestamp and captions (local use)",
+  "permissions": ["tabs", "activeTab", "downloads", "*://*.udemy.com/*"],
   "background": {
-    "service_worker": "background.js"
+    "scripts": ["background.js"]
   },
   "content_scripts": [
     {
@@ -22,7 +22,13 @@
       "description": "Capture current Udemy tab"
     }
   },
-  "action": {
+  "browser_action": {
     "default_title": "Capture Udemy Tab"
+  },
+  "applications": {
+    "gecko": {
+      "id": "udemy-screenshot@local",
+      "strict_min_version": "109.0"
+    }
   }
 }

@@ -1,5 +1,7 @@
 // content.js
-
+if (typeof browser === "undefined") {
+  var browser = chrome;
+}
 // Variables
 const urlAndPort = "http://localhost:3000/";
 const parentHeadingQuery = 'h1[data-purpose="course-header-title"]';

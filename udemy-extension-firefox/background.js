@@ -1,94 +1,78 @@
 // background.js
 const LOCAL_SERVER = "http://localhost:3000/screenshorts-with-timestamps";
 
-/** Helper: promisified queries/messaging */
-function queryActiveTab() {
-  return new Promise((resolve) =>
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) =>
-      resolve(tabs[0])
-    )
-  );
+// Polyfill: make browser.* available even if only chrome.* exists
+if (typeof browser === "undefined") {
+  var browser = chrome;
 }
 
+// Query the active tab
+function queryActiveTab() {
+  return browser.tabs
+    .query({ active: true, currentWindow: true })
+    .then((tabs) => tabs[0]);
+}
+
+// Send message to content script
 function sendMessageToTab(tabId, message) {
-  return new Promise((resolve) => {
-    chrome.tabs.sendMessage(tabId, message, (response) => {
-      // If content script not available, chrome.runtime.lastError is set
-      if (chrome.runtime.lastError) {
-        console.warn("sendMessage error:", chrome.runtime.lastError.message);
-        resolve(null);
-      } else {
-        resolve(response);
-      }
-    });
+  return browser.tabs.sendMessage(tabId, message).catch((err) => {
+    console.warn("sendMessage error:", err);
+    return null;
   });
 }
 
-// Trigger via toolbar click
-chrome.action.onClicked.addListener(() => {
+// Toolbar button click
+browser.browserAction.onClicked.addListener(() => {
   captureActiveUdemyTab();
 });
 
-// Trigger via hotkey
-chrome.commands.onCommand.addListener((command) => {
+// Keyboard shortcut
+browser.commands.onCommand.addListener((command) => {
   if (command === "capture-tab") captureActiveUdemyTab();
 });
 
 async function captureActiveUdemyTab() {
   const tab = await queryActiveTab();
-  if (!tab) {
-    console.warn("No active tab found");
-    return;
-  }
-
-  if (!tab.url || !tab.url.includes("udemy.com")) {
+  if (!tab || !tab.url || !tab.url.includes("udemy.com")) {
     console.warn("⚠️ Not a Udemy tab. Capture skipped.");
     return;
   }
 
-  // Ask content script for parentTitle (slugified)
+  // Ask content script for page data
   const resp = await sendMessageToTab(tab.id, { action: "getParentTitle" });
-  const parentTitle = resp?.parentTitle || "";
-  const title = resp?.title || "";
-  const timestamp = resp?.timestamp || "";
-  const captions = resp?.captions || "";
-  const sectionName = resp?.sectionName || "";
+  if (!resp) {
+    console.warn("⚠️ No response from content script");
+    return;
+  }
 
-  // Capture visible tab (use jpeg with quality or png)
-  chrome.tabs.captureVisibleTab(
-    tab.windowId,
-    { format: "jpeg", quality: 90 },
-    (dataUrl) => {
-      if (chrome.runtime.lastError || !dataUrl) {
-        console.error("❌ Capture failed", chrome.runtime.lastError);
-        return;
-      }
+  const { parentTitle, title, timestamp, captions, sectionName } = resp;
 
-      // Show overlay in page
-      chrome.tabs.sendMessage(tab.id, { action: "tabCaptured", dataUrl });
+  // Capture visible tab
+  const dataUrl = await browser.tabs.captureVisibleTab(tab.windowId, {
+    format: "jpeg",
+    quality: 90,
+  });
 
-      // Build payload exactly how server expects: screenshot key contains data URL
-      let rootDirectory = "udemy";
+  // Show overlay image on the page
+  browser.tabs.sendMessage(tab.id, { action: "tabCaptured", dataUrl });
 
-      const payload = {
-        parentTitle,
-        title,
-        timestamp,
-        captions,
-        screenshot: dataUrl,
-        sectionName,
-        rootDirectory,
-      };
+  const payload = {
+    parentTitle,
+    title,
+    timestamp,
+    captions,
+    screenshot: dataUrl,
+    sectionName,
+    rootDirectory: "udemy",
+  };
 
-      // Send as JSON (server expects screenshot in req.body.screenshot)
-      fetch(LOCAL_SERVER, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-        .then((res) => res.text())
-        .then((text) => console.log("✅ Server response:", text))
-        .catch((err) => console.error("❌ Upload failed:", err));
-    }
-  );
+  // Send screenshot data to local server
+  fetch(LOCAL_SERVER, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+    .then((res) => res.text())
+    .then((text) => console.log("✅ Server response:", text))
+    .catch((err) => console.error("❌ Upload failed:", err));
 }

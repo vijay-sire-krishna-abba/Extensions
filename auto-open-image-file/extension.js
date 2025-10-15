@@ -70,6 +70,22 @@ function activate(context) {
             "workbench.files.action.collapseExplorerFolders"
           );
 
+          // run Luna commands 500ms after opening the image
+          await new Promise((res) => setTimeout(res, 50));
+          const commands = [
+            "luna.tool.toggleToolsWindow",
+            "luna.layer.toggleLayersWindow",
+            "luna.history.toggleHistoryWindow",
+            "luna.color.toggleColorsWindow",
+          ];
+          for (const cmd of commands) {
+            try {
+              await vscode.commands.executeCommand(cmd);
+            } catch (cmdErr) {
+              console.warn(`Failed to run command "${cmd}":`, cmdErr);
+            }
+          }
+
           // Optional feedback
           console.log("Opened new image:", filePath);
         } catch (err) {

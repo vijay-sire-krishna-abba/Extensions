@@ -2,7 +2,7 @@
   "name": "auto-open-images",
   "displayName": "Auto Open Images",
   "description": "Automatically opens newly added image files and closes previously open ones. Includes ON/OFF toggle in the status bar.",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "publisher": "local",
   "engines": {
     "vscode": "^1.90.0"

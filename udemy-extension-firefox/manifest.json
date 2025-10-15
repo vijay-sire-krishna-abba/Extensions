@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "Udemy Screenshot Only (Firefox)",
+  "name": "Udemy Screenshot",
   "version": "1.0",
   "description": "Capture Udemy video screenshots with timestamp and captions (local use)",
   "permissions": ["tabs", "activeTab", "downloads", "*://*.udemy.com/*"],
@@ -25,9 +25,9 @@
   "browser_action": {
     "default_title": "Capture Udemy Tab"
   },
-  "applications": {
+  "browser_specific_settings": {
     "gecko": {
-      "id": "udemy-screenshot@local",
+      "id": "udemy-screenshot-only-v2@personal",
       "strict_min_version": "109.0"
     }
   }

@@ -1,0 +1,31 @@
+{
+  "name": "auto-open-images",
+  "displayName": "Auto Open Images",
+  "description": "Automatically opens newly added image files and closes previously open ones. Includes ON/OFF toggle in the status bar.",
+  "version": "0.0.4",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "autoOpenImages.toggle",
+        "title": "Toggle Auto Open Images"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "echo 'no prepublish needed'"
+  },
+  "keywords": [
+    "images",
+    "autoopen",
+    "watch",
+    "productivity"
+  ]
+}

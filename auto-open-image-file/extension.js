@@ -25,78 +25,73 @@ function activate(context) {
     }
   );
 
-  // Watch all workspace folders recursively
-  vscode.workspace.workspaceFolders?.forEach((folder) => {
-    const rootPath = folder.uri.fsPath;
-    const watcher = fs.watch(
-      rootPath,
-      { recursive: true },
-      async (eventType, filename) => {
-        if (!enabled || !filename) return;
+  // Use VS Code's FileSystemWatcher and debounce to avoid duplicate events
+  const seen = new Map(); // filePath -> lastHandledTimestamp
+  const DEBOUNCE_MS = 700;
+  const pattern = "**/*.{png,jpg,jpeg,gif,webp,bmp}";
+  const fileWatcher = vscode.workspace.createFileSystemWatcher(pattern);
 
-        const ext = path.extname(filename).toLowerCase();
-        if (![".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"].includes(ext))
-          return;
+  async function handleFileUri(fileUri) {
+    if (!enabled || !fileUri) return;
+    const filePath = fileUri.fsPath;
+    const now = Date.now();
+    const last = seen.get(filePath) || 0;
+    if (now - last < DEBOUNCE_MS) return;
+    seen.set(filePath, now);
+    setTimeout(() => seen.delete(filePath), DEBOUNCE_MS * 2);
 
-        const filePath = path.join(rootPath, filename);
+    // Wait a moment to ensure file fully exists
+    await new Promise((res) => setTimeout(res, 400));
+    if (!fs.existsSync(filePath)) return;
 
-        // Wait a moment to ensure file fully exists
-        await new Promise((res) => setTimeout(res, 400));
+    try {
+      const fileUriObj = vscode.Uri.file(filePath);
+      await vscode.commands.executeCommand("vscode.open", fileUriObj);
 
-        if (!fs.existsSync(filePath)) return;
-
-        try {
-          const fileUri = vscode.Uri.file(filePath);
-
-          // 🪄 Open image with VS Code's default viewer (works with Luna Paint)
-          await vscode.commands.executeCommand("vscode.open", fileUri);
-
-          // 🧹 Close all other image tabs except the newly opened one
-          for (const group of vscode.window.tabGroups.all) {
-            for (const tab of group.tabs) {
-              if (
-                tab.input &&
-                tab.input.uri &&
-                /\.(png|jpe?g|gif|webp|bmp)$/i.test(tab.input.uri.fsPath) &&
-                tab.input.uri.fsPath !== filePath
-              ) {
-                await vscode.window.tabGroups.close(tab);
-              }
-            }
+      for (const group of vscode.window.tabGroups.all) {
+        for (const tab of group.tabs) {
+          if (
+            tab.input &&
+            tab.input.uri &&
+            /\.(png|jpe?g|gif|webp|bmp)$/i.test(tab.input.uri.fsPath) &&
+            tab.input.uri.fsPath !== filePath
+          ) {
+            await vscode.window.tabGroups.close(tab);
           }
-
-          // Optionally collapse Explorer folders
-          await vscode.commands.executeCommand(
-            "workbench.files.action.collapseExplorerFolders"
-          );
-
-          // run Luna commands 500ms after opening the image
-          await new Promise((res) => setTimeout(res, 300));
-          const commands = [
-            "luna.tool.toggleToolsWindow",
-            "luna.layer.toggleLayersWindow",
-            "luna.history.toggleHistoryWindow",
-            "luna.color.toggleColorsWindow",
-          ];
-          for (const cmd of commands) {
-            try {
-              await vscode.commands.executeCommand(cmd);
-            } catch (cmdErr) {
-              console.warn(`Failed to run command "${cmd}":`, cmdErr);
-            }
-          }
-
-          // Optional feedback
-          console.log("Opened new image:", filePath);
-        } catch (err) {
-          console.error("auto-open-images error:", err);
         }
       }
-    );
 
-    watchers.push(watcher);
-  });
+      await vscode.commands.executeCommand(
+        "workbench.files.action.collapseExplorerFolders"
+      );
 
+      // run Luna commands after opening the image
+      await new Promise((res) => setTimeout(res, 300));
+      const commands = [
+        "luna.tool.toggleToolsWindow",
+        "luna.layer.toggleLayersWindow",
+        "luna.history.toggleHistoryWindow",
+        "luna.color.toggleColorsWindow",
+      ];
+      for (const cmd of commands) {
+        try {
+          await vscode.commands.executeCommand(cmd);
+        } catch (cmdErr) {
+          console.warn(`Failed to run command "${cmd}":`, cmdErr);
+        }
+      }
+
+      console.log("Opened new image:", filePath);
+    } catch (err) {
+      console.error("auto-open-images error:", err);
+    }
+  }
+
+  fileWatcher.onDidCreate(handleFileUri);
+  // optionally: fileWatcher.onDidChange(handleFileUri);
+
+  watchers.push(fileWatcher);
+  context.subscriptions.push(fileWatcher);
   context.subscriptions.push(toggleCommand, statusBar);
 }
 

@@ -71,7 +71,7 @@ function activate(context) {
           );
 
           // run Luna commands 500ms after opening the image
-          await new Promise((res) => setTimeout(res, 50));
+          await new Promise((res) => setTimeout(res, 300));
           const commands = [
             "luna.tool.toggleToolsWindow",
             "luna.layer.toggleLayersWindow",

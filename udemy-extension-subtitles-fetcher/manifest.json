@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Udemy Subtitle Extractor",
+  "version": "1.0.1",
+  "description": "Intercepts and sends Udemy subtitle (.vtt) data to your local server.",
+  "permissions": ["scripting", "activeTab", "storage"],
+  "host_permissions": ["*://*.udemy.com/*", "http://localhost:3000/*"],
+  "content_scripts": [
+    {
+      "matches": ["*://*.udemy.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "128": "icons/icon128.png"
+  }
+}

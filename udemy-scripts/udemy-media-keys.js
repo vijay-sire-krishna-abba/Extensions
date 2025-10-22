@@ -80,5 +80,5 @@ function setupMediaSession() {
 (function () {
   "use strict";
   setupMediaSession();
-  initProgressObserver();
+  // initProgressObserver();
 })();

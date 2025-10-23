@@ -56,6 +56,23 @@ function initProgressObserver() {
 function setupMediaSession() {
   if (!("mediaSession" in navigator)) return;
 
+  // ---
+  document.addEventListener("keydown", (event) => {
+    // Check if the key pressed is "K" or "k"
+    if (event.key === "K" || event.key === "k") {
+      const playBtn = document.querySelector(SELECTORS.playBtn);
+      const pauseBtn = document.querySelector(SELECTORS.pauseBtn);
+
+      // If play button exists, click it; otherwise, click pause button
+      if (playBtn) {
+        playBtn.click();
+      } else if (pauseBtn) {
+        pauseBtn.click();
+      }
+    }
+  });
+  // ---
+
   navigator.mediaSession.setActionHandler("play", () => {
     document.querySelector(SELECTORS.playBtn)?.click();
   });

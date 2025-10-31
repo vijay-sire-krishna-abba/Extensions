@@ -22,9 +22,9 @@
   const log = (...args) => DEBUG && console.log(...args);
   const error = (...args) => DEBUG && console.error(...args);
 
-  /** ========================================
-   * SERVER API HANDLER
-   * ======================================== */
+  /** ========================================    
+   * SERVER API HANDLER    
+   * ======================================== */   
   const ServerAPI = {
     post(endpoint, data) {
       log(`🌐 [POST] → ${endpoint}`, data);

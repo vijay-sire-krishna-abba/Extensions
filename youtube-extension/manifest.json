@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Youtube screenshot Only",
+  "version": "1.0",
+  "permissions": ["tabs", "activeTab", "scripting"],
+  "host_permissions": ["*://*.youtube.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "commands": {
+    "capture-tab": {
+      "suggested_key": {
+        "default": "Alt+Shift+S",
+        "mac": "Alt+Shift+S"
+      },
+      "description": "Capture current Youtube tab"
+    }
+  },
+  "action": {
+    "default_title": "Capture Youtube Tab"
+  }
+}
